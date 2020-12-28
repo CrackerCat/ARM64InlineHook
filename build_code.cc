@@ -8,29 +8,28 @@ namespace wfcpc
 		long double Neon_Registers[8];
 		uint64_t (*template_new_func)(uint64_t a,uint64_t b,uint64_t c,uint64_t d,uint64_t e,
 									  uint64_t f,uint64_t g,uint64_t h,long double i,long double j,long double k,long double l
-				,long double m,long double n,long double o,long double p);
+				,long double m,long double n,long double o,long double p);//最多支持8个普通参数+8个浮点参数
 		uint64_t template_orig_func();
 		uint64_t (*template_orig_func_pointer)();
 
+		//函数执行前获取寄存器值
 		void get_args();
 		void (*get_args_pointer)()=get_args;
-		void check_register();//函数执行前获取寄存器值
-		
-		
+		void check_register();
 
-
+		//保存sp指针
 		uint64_t sp_value=0,fake_sp_value=0;
-		
-		
+		//保存lr值
 		uint64_t lr_value=0;
-
+		//保存的指针
 		void *q0_pointer;
 		void *x0_pointer;
 		void *lr_pointer;
+		//启动自己定义的函数
 		uint64_t set_new_func();
 		uint64_t (*set_new_func_pointer)()=set_new_func;
 		
-		
+		//保存的原来函数的返回值
 		uint64_t orig_x0_value;
 		long double orig_q0_value;
 
@@ -61,9 +60,9 @@ namespace wfcpc
 			template_orig_func_pointer=template_orig_func;
 			*(this->orig_addr)=*(void **)&template_orig_func_pointer;
 			this->set_mem_RWE();
-			this->build_step_1();
-			this->build_step_2();
-			this->build_step_3();
+			this->build_step_1();//函数开头跳转
+			this->build_step_2();//函数执行前函数
+			this->build_step_3();//函数执行后函数
 			sleep(1.5);
 	
 			this->set_mem_RE();
@@ -72,10 +71,10 @@ namespace wfcpc
 
 		void BuildCode::build_step_1()
 		{
-			this->jmp_code.emit(ldrImmi(2, x28, true));//jmp code
+			this->jmp_code.emit(ldrImmi(2, x28, true));
 			this->jmp_code.emit(br(x28));
 			this->jmp_code.emit((uint64_t)this->func_before);
-			memcpy(this->back_up.code,this->hook_addr,sizeof(uint8_t)*16);//backup
+			memcpy(this->back_up.code,this->hook_addr,sizeof(uint8_t)*16);
 		}
 		void BuildCode::build_step_2()
 		{
@@ -101,7 +100,7 @@ namespace wfcpc
 			this->code_before.emit(stp(0x20, q3, sp, q2, true));
 			this->code_before.emit(stp(0x40, q5, sp, q4, true));
 			this->code_before.emit(stp(0x60, q7, sp, q6, true));
-			//this->code_before.emit(0x910003E0);//sp传入x0
+	
 			this->code_before.emit(ldrImmi(31, x28, true));
 			this->code_before.emit(blr(x28));
 
@@ -129,7 +128,7 @@ namespace wfcpc
 			this->code_before.emit(msr_NZCV(x28));
 			this->code_before.emit(ldrImmi(11,lr,true));//修改lr寄存器，指向after
 			
-
+			//指令修复(没几个)
 			uint32_t *temp=(uint32_t*)this->hook_addr;
 			int ins1_offset=get_need_fix_Ins_offset(temp[0]);
 			int ins2_offset=get_need_fix_Ins_offset(temp[1]);
@@ -170,7 +169,7 @@ namespace wfcpc
 			
 			memcpy(this->code_before.code + this->code_before.position, this->back_up.code, sizeof(uint8_t) * 16);//备份指令复原
 			this->code_before.position += 16;
-
+			/////
 			
 
 			this->code_before.emit(ldrImmi(4, x28, true));//跳转回原函数
@@ -348,6 +347,7 @@ namespace wfcpc
 		{
 			
 			orig_x0_value=*((uint64_t*)x0_pointer);
+			//调用自己定义的函数
 			uint64_t temp_ret_value=(*template_new_func)(Normal_Registers[0],Normal_Registers[1]
 					,Normal_Registers[2],Normal_Registers[3],Normal_Registers[4],Normal_Registers[5]
 					,Normal_Registers[6],Normal_Registers[7],Neon_Registers[0],Neon_Registers[1]

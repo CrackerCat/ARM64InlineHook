@@ -1,4 +1,6 @@
-#pragma once
+/*
+临时保存代码段的类
+*/
 #ifndef CODES_ARM64_H_
 #define CODES_ARM64_H_
 #include "registers_arm64.h"
@@ -15,7 +17,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <iomanip>
-//#include "temp.S"
 
 namespace wfcpc
 {

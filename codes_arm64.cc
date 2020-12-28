@@ -13,18 +13,8 @@ namespace wfcpc
 		{}
 		void Codes::emit(uint32_t c)
 		{
-			// using namespace std;
-			// cout<<"got uint32_t ins!"<<endl;
-			// cout<<setw(2)<<setfill('0')<<hex<<(uint64_t)c<<endl;
 			memcpy(this->code+this->position, &c, sizeof(c));
 			this->position += 4;
-			// cout<<"now codes"<<endl;
-			// for(int i=0;i<this->size;i++)
-			// {
-			// 	cout<<setw(2)<<setfill('0')<<hex<<(uint64_t)this->code[i]<<" ";
-			// }
-			// cout<<endl;
-			// cout<<"----------end---------"<<endl;
 		}
 		void Codes::emit(uint64_t c)
 		{

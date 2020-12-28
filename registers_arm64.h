@@ -1,4 +1,6 @@
-
+/*
+实现汇编指令的头文件,实现我就不放这里了，有点长
+*/
 #ifndef WFCPC_REGISTERS_ARM64_H_
 #define WFCPC_REGISTERS_ARM64_H_
 #include <iostream>
